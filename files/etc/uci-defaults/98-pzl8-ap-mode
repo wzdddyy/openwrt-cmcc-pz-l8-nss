@@ -1,0 +1,44 @@
+#!/bin/sh
+# First boot: turn this image from a router into a dumb AP.
+#
+# The shipped layout is a router: VLAN 1 (ports 1 2 3 + CPU port 5) is br-lan
+# on eth0, VLAN 2 (port 4 + CPU port 6) is the WAN on eth1, and there is NAT,
+# a DHCP server and a firewall behind it. An AP hanging off an existing LAN
+# wants none of that:
+#
+#   * all four jacks move into VLAN 1 with the single CPU port 5, and VLAN 2 is
+#     removed - the jack that used to be WAN becomes just another LAN port and
+#     every frame between them is switched in hardware;
+#   * br-lan keeps only eth0. Adding eth1 too would put both CPU ports of one
+#     VLAN into one software bridge, duplicating every broadcast;
+#   * lan takes its address from the upstream DHCP server, because the stock
+#     static 192.168.10.1 collides with any upstream already using that subnet;
+#   * the firewall is disabled (nothing here to NAT or filter) and dnsmasq is
+#     left running as the local resolver only, with lease handing turned off -
+#     a second DHCP server on the upstream LAN breaks clients. odhcpd is
+#     disabled for the same reason.
+#
+# A sysupgrade that kept configuration runs this again; the wan interface is
+# the router marker, so a box already switched to AP is left alone.
+
+[ -f /etc/config/network ] || exit 1
+[ -n "$(uci -q get network.wan)" ] || exit 0
+
+uci -q delete network.wan
+uci -q delete network.wan6
+
+uci set network.lan.proto='dhcp'
+uci -q delete network.lan.ipaddr
+uci -q delete network.lan.ip6assign
+
+uci set network.@switch_vlan[0].ports='1 2 3 4 5'
+uci -q delete network.@switch_vlan[1]
+uci commit network
+
+uci set dhcp.lan.ignore='1'
+uci commit dhcp
+
+/etc/init.d/firewall disable
+/etc/init.d/odhcpd disable
+
+exit 0
