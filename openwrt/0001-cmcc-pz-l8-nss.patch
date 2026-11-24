@@ -439,11 +439,11 @@ index 874e96d489..7b8fd6c6a4 100644
  case "$board" in
 -cmcc,pz-l8|\
 +cmcc,pz-l8)
-+	# The external QCA8337 is driven by qca-ssdk/swconfig, not DSA, so there is
-+	# no netdev called "wan" to bind the trigger to: WAN traffic runs over GMAC1
-+	# (eth1, switch port 6).  Naming a DSA-style port here leaves device_name
-+	# empty and the LED dark.  Only link_1000 exists on this port.
-+	ucidef_set_led_netdev "wan" "WAN" "green:wan" "eth1" "tx rx link_1000"
++	# This board runs qca-ssdk/swconfig rather than DSA and ships as an AP:
++	# all four jacks are one bridge, so there is no WAN netdev and no NAT.
++	# A netdev trigger bound to eth1 would stay dark; use green:wan as a
++	# plain heartbeat instead.
++	ucidef_set_led_heartbeat "wan" "WAN" "green:wan"
 +	;;
  elecom,wrc-x3000gs2|\
  iodata,wn-dax3000gr)
