@@ -13,10 +13,11 @@
 #     VLAN into one software bridge, duplicating every broadcast;
 #   * lan takes its address from the upstream DHCP server, because the stock
 #     static 192.168.10.1 collides with any upstream already using that subnet;
-#   * the firewall is disabled (nothing here to NAT or filter) and dnsmasq is
-#     left running as the local resolver only, with lease handing turned off -
-#     a second DHCP server on the upstream LAN breaks clients. odhcpd is
-#     disabled for the same reason.
+#   * the firewall is disabled (nothing here to NAT or filter), and so are
+#     dnsmasq and odhcpd: a second DHCP server on the upstream LAN breaks
+#     clients, and a bridge-only AP needs neither. The router itself still
+#     resolves names - netifd writes the DNS servers from the upstream lease to
+#     /tmp/resolv.conf.d/resolv.conf.auto, which /etc/resolv.conf links to.
 #
 # A sysupgrade that kept configuration runs this again; the wan interface is
 # the router marker, so a box already switched to AP is left alone.
@@ -35,10 +36,8 @@ uci set network.@switch_vlan[0].ports='1 2 3 4 5'
 uci -q delete network.@switch_vlan[1]
 uci commit network
 
-uci set dhcp.lan.ignore='1'
-uci commit dhcp
-
 /etc/init.d/firewall disable
+/etc/init.d/dnsmasq disable
 /etc/init.d/odhcpd disable
 
 exit 0
