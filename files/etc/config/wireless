@@ -1,11 +1,10 @@
 # Shipped by this build. Stock OpenWrt leaves both radios disabled with an
 # SSID of "OpenWrt"; this comes up ready.
 #
-# The SSIDs below gain the board's own MAC suffix on first boot, from
-# /etc/uci-defaults/97-pzl8-wifi-ssid - PZ-L8-5G becomes PZ-L8-5G-8F79 or
-# whatever this board's MAC ends in, so two of them do not collide. Rename them
-# to anything you like; that script only touches a name it still recognises as
-# the shipped one.
+# Both bands ship the same SSID so clients roam between them, and the name is
+# fixed rather than suffixed with the board MAC: 97-pzl8-wifi-ssid only rewrites
+# a name it still recognises as the stock PZ-L8-2G / PZ-L8-5G, so "500/2" is
+# left alone. Rename to anything you like.
 #
 # CHANGE THESE TWO BEFORE YOU RELY ON IT:
 #
@@ -42,9 +41,9 @@ config wifi-iface 'default_radio0'
 	option device 'radio0'
 	option network 'lan'
 	option mode 'ap'
-	option ssid 'PZ-L8-2G'
+	option ssid '500/2'
 	option encryption 'psk2+ccmp'
-	option key 'pzl8test2026'
+	option key '18687756610'
 
 config wifi-device 'radio1'
 	option type 'mac80211'
@@ -59,6 +58,6 @@ config wifi-iface 'default_radio1'
 	option device 'radio1'
 	option network 'lan'
 	option mode 'ap'
-	option ssid 'PZ-L8-5G'
+	option ssid '500/2'
 	option encryption 'psk2+ccmp'
-	option key 'pzl8test2026'
+	option key '18687756610'
