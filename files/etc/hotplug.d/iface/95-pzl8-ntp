@@ -1,0 +1,26 @@
+#!/bin/sh
+# sysntpd starts at S98 inside a ujail, and that jail snapshots /etc/resolv.conf
+# when it is built.  netifd may not have written the lease's DNS servers yet at
+# that point: ntpd then has an empty resolv.conf, cannot resolve its pool names,
+# and the clock stays at whatever sysfixtime restored.
+#
+# Run from outside the jail once the interface is up, wait for a real
+# nameserver, and restart the daemon so the new jail carries it.  The wait is
+# in the background so hotplug processing is not held up.
+
+case "$ACTION" in
+	ifup|ifupdate) ;;
+	*) exit 0 ;;
+esac
+
+(
+	i=0
+	while [ $i -lt 30 ]; do
+		grep -q '^nameserver' /tmp/resolv.conf 2>/dev/null && break
+		sleep 1
+		i=$((i + 1))
+	done
+	/etc/init.d/sysntpd restart
+) &
+
+exit 0
