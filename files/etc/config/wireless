@@ -27,6 +27,13 @@
 # hostapd runs a 62 s channel-availability check before the first beacon on
 # every boot, and radar can move it later. Both are the price of 160 MHz on
 # this board; HE80 removes them and costs about a third of the throughput.
+#
+# max_inactivity is raised to a day because hostapd's inactivity check reads
+# mac80211's per-station last_rx, and that counter never moves on this data
+# path: NSS forwards the clients' frames itself, so the host only ever sees
+# the association. Left at hostapd's 300 s default, every client is
+# deauthenticated five minutes after joining and reconnects immediately.
+# Any additional SSID added later needs the same option.
 
 config wifi-device 'radio0'
 	option type 'mac80211'
@@ -42,6 +49,7 @@ config wifi-iface 'default_radio0'
 	option network 'lan'
 	option mode 'ap'
 	option ssid '500/2'
+	option max_inactivity '86400'
 	option encryption 'psk2+ccmp'
 	option key '18687756610'
 
@@ -59,5 +67,6 @@ config wifi-iface 'default_radio1'
 	option network 'lan'
 	option mode 'ap'
 	option ssid '500/2'
+	option max_inactivity '86400'
 	option encryption 'psk2+ccmp'
 	option key '18687756610'
