@@ -1,0 +1,17 @@
+#!/bin/sh
+# Stock OpenWrt leaves the hostname "OpenWrt", so several devices on one LAN are
+# indistinguishable in DHCP leases and LuCI.  This image is the AP of the pair,
+# so it gets a fixed name instead.
+#
+# Only the stock name, or the MAC-suffixed name an earlier build of this image
+# used, is replaced: a hostname the user chose is left alone.
+
+cur=$(uci -q get system.@system[0].hostname)
+case "$cur" in
+	''|OpenWrt|PZ-L8-[0-9A-F][0-9A-F][0-9A-F][0-9A-F])
+		uci set system.@system[0].hostname='PZ-L8-AP'
+		uci commit system
+		;;
+esac
+
+exit 0
