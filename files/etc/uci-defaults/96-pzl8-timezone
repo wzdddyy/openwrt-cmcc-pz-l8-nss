@@ -1,0 +1,21 @@
+#!/bin/sh
+# Stock OpenWrt boots with timezone 'UTC', so LuCI and every log timestamp sit
+# eight hours behind the wall clock on a China-located AP.  Only the stock
+# value is replaced: a timezone the user picked is left alone.
+
+cur=$(uci -q get system.@system[0].zonename)
+case "$cur" in
+	''|UTC)
+		uci set system.@system[0].timezone='CST-8'
+		uci set system.@system[0].zonename='Asia/Shanghai'
+		uci commit system
+
+		# /etc/init.d/system has already exported UTC by the time
+		# uci-defaults run, so apply it now instead of at the next boot.
+		echo 'CST-8' > /etc/TZ
+		[ -f /usr/share/zoneinfo/Asia/Shanghai ] &&
+			ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+		;;
+esac
+
+exit 0
