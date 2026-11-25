@@ -82,6 +82,10 @@ find "$OW/files" -type f | sed "s|$OW/|  |"
 chmod +x "$OW"/files/etc/init.d/* 2>/dev/null || true
 # rpcd runs these as programs; a 644 plugin never registers its ubus object
 chmod +x "$OW"/files/usr/libexec/rpcd/* 2>/dev/null || true
+# uci-defaults are executed from the image, so a 644 script is skipped
+chmod +x "$OW"/files/etc/uci-defaults/* 2>/dev/null || true
+# hotplug-call executes these too
+chmod +x "$OW"/files/etc/hotplug.d/*/* 2>/dev/null || true
 
 # ---------------------------------------------------------------- 7. config
 # An existing .config is someone's menuconfig session and is left alone.
